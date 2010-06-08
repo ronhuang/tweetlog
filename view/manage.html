@@ -17,6 +17,23 @@
     google.load("jquery", "1.4.2");
     //]]>
   </script>
+
+  <script>
+    //<![CDATA[
+    $(function() {
+      $('#toggle_help').click(function() {
+        if ($('#help').is(':hidden')) {
+          $('#help').slideDown('slow');
+        } else {
+          $('#help').slideUp('slow', function() {
+            $('#help').hide();
+          });
+        }
+        return false;
+      });
+    });
+    //]]>
+  </script>
 </head>
 
 <body id="info">
@@ -51,21 +68,6 @@
     {% else %}
 
     <p>Specify the tweets you wish to collect (<a href="#" id="toggle_help">help</a>.)</p>
-
-    <script>
-      //<![CDATA[
-      $('#toggle_help').click(function() {
-        if ($('#help').is(':hidden')) {
-          $('#help').slideDown('slow');
-        } else {
-          $('#help').slideUp('slow', function() {
-            $('#help').hide();
-          });
-        }
-        return false;
-      });
-      //]]>
-    </script>
 
     <div id="help" style="display:none;">
     <div class="section">
