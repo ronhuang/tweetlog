@@ -1,0 +1,36 @@
+/* Copied from
+ * http://www.onextrapixel.com/2009/04/24/5-different-tutorials-of-creating-dynamic-css-round-corners-link-buttons/
+ */
+
+.button li {
+	display:inline;
+	list-style:none;
+}
+
+.button li a {
+	background:transparent url(/img/buttons.jpg) no-repeat top left;
+	display:block;
+	float:left;
+	height:22px;
+	margin-right:15px;
+
+	text-decoration:none;
+}
+
+.button li a span {
+	background:transparent url(/img/buttons.jpg) no-repeat right top;
+	cursor:pointer;
+	display:inline;
+	float:left;
+	height:22px;
+	padding:0 10px 0 0;
+	margin-left:10px;
+}
+
+.button li a:hover {
+	background-position:0px bottom; color:#fff;
+}
+
+.button li a:hover span {
+	background-position:right bottom;
+}

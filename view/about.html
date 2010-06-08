@@ -1,0 +1,68 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en-us">
+
+<head>
+   <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+   <title>Tweet Log</title>
+   <meta name="author" content="Ron Huang" />
+   <link rel="stylesheet" href="/css/screen.css" type="text/css" />
+   <link rel="stylesheet" href="/css/button.css" type="text/css" />
+</head>
+
+<body id="Home">
+<div id="site">
+
+  <div id="header">
+    <h1>
+      <a href="/">Tweet Log</a>
+    </h1>
+    <ul class="nav">
+      <li><a class="home" href="/">Home</a></li>
+      {% if signed_in %}
+      <li><a class="info" href="/manage">@{{ screen_name }} (Manage)</a></li>
+      <li><a class="code" href="/sign_out">Sign Out</a></li>
+      {% else %}
+      <li><a class="info" href="/sign_in">
+          <img src="/img/Sign-in-with-Twitter-lighter.png"
+               height="17px"
+               alt="Sign in with Twitter" />
+      </a></li>
+      {% endif %}
+    </ul>
+  </div>
+
+  <div id="page">
+    <!--<img class='inset right' title='Mark Reid' src='/images/mark_reid.jpg' alt='Photo of Mark Reid drinking a coffee' width='120px' />-->
+    <h1 id='welcome'>Welcome</h1>
+
+    <p>Tweet Log collects tweets that match the search criteria and
+    retweet them in your Twitter account.</p>
+
+	<ul class="button">
+	  <li><a href="/sign_in"><span>Give it a try</span></a></li>
+	</ul>
+
+    <p>&nbsp;</p>
+  </div>
+
+  <div id="footer">
+    <address>
+      <span class="copyright">
+        Content by <a href="http://ronhuang.org/">Ron Huang</a>
+        &amp; Design by
+        <a href="http://mark.reid.name/info/site.html">Mark Reid</a>
+        <br/>
+        (<a rel="licence" href="http://creativecommons.org/licenses/by-nc-sa/3.0/">Some rights reserved</a>)
+      </span>
+      <span class="engine">
+        Powered by
+        <a href="http://code.google.com/appengine/">Google App Engine</a>
+      </span>
+    </address>
+  </div>
+
+</div>
+</body>
+</html>
