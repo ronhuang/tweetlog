@@ -260,6 +260,8 @@ body#Kith #header a.kith
 	border-bottom: 2px solid silver; 
 }
 
+#header a img { border: 0px; }
+
 /* @end */
 
 /* @group Footnotes */
