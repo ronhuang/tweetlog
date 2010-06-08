@@ -37,31 +37,31 @@ from utils import Cookies
 COOKIE_LIFE = 7 * 24 * 60 * 60 # 1 week
 
 
+def get_user_status(cookies):
+    user = None
+    screen_name = None
+
+    if "ulg" in cookies and "auau" in cookies:
+        token_key = cookies["ulg"]
+        token_secret = cookies["auau"]
+
+        user = User.gql("WHERE token_key=:key AND token_secret=:secret",
+                        key=token_key, secret=token_secret).get()
+
+    if user:
+        screen_name = user.screen_name
+
+    return user, screen_name
+
+
 class MainHandler(webapp.RequestHandler):
     def get(self):
-        signed_in = False
-        user = None
-        screen_name = None
         cookies = Cookies(self, max_age = COOKIE_LIFE)
-
-        if "ulg" in cookies and "auau" in cookies:
-            token_key = cookies["ulg"]
-            token_secret = cookies["auau"]
-
-            user = User.gql("WHERE token_key=:key AND token_secret=:secret",
-                            key=token_key, secret=token_secret).get()
-
-        if user:
-            screen_name = user.screen_name
-            signed_in = True
-        else:
-            # sign out
-            del cookies["ulg"]
-            del cookies["auau"]
-
-        data = {'signed_in': signed_in,
-                'screen_name': screen_name,
-                }
+        user, screen_name = get_user_status(cookies)
+        data = {
+            'signed_in': user and True,
+            'screen_name': screen_name,
+            }
         path = os.path.join(os.path.dirname(__file__), 'view', 'about.html')
         self.response.out.write(template.render(path, data))
 
@@ -170,14 +170,15 @@ class SignOutHandler(webapp.RequestHandler):
 
 class ManageHandler(webapp.RequestHandler):
     def get(self):
-        self.response.out.write("Go away!")
+        cookies = Cookies(self, max_age = COOKIE_LIFE)
+        user, screen_name = get_user_status(cookies)
 
-
-class TestHandler(webapp.RequestHandler):
-    def get(self):
-        auth = tweepy.OAuthHandler(CONSUMER_KEY, CONSUMER_SECRET)
-        auth.set_access_token("797941-3EISLGND8rstocPU7xQzCjbvi7j9KyICyLr839uIUs",
-                              "9akizEbJsefHiyuq4DWzSicDBecrTbGzzHEil8KCo")
+        data = {
+            'signed_in': user and True,
+            'screen_name': screen_name,
+            }
+        path = os.path.join(os.path.dirname(__file__), 'view', 'manage.html')
+        self.response.out.write(template.render(path, data))
 
 
 def main():
@@ -187,7 +188,6 @@ def main():
         ('/sign_in', SignInHandler),
         ('/sign_out', SignOutHandler),
         ('/manage', ManageHandler),
-        ('/test', TestHandler),
         ]
     application = webapp.WSGIApplication(actions, debug=True)
     util.run_wsgi_app(application)
