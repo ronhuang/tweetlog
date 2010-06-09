@@ -36,3 +36,9 @@ class User(db.Model):
     screen_name = db.StringProperty(required=True)
     token_key = db.StringProperty(required=True)
     token_secret = db.StringProperty(required=True)
+
+
+class Criterion(db.Model):
+    screen_name = db.StringProperty(required=True)
+    term = db.StringProperty(required=True)
+    list_id = db.StringProperty(required=True)

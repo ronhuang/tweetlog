@@ -42,24 +42,40 @@
 
     $(function() {
       $('#save').click(function() {
-        alert($('#target').serialize());
+        $('#loading').show();
+
+        $.ajax({
+          type: 'POST',
+          url: '/save',
+          data: $('#target').serialize(),
+          success: function(data) {
+            sr = $('#save_result');
+            if ('success' == data) {
+              sr.removeClass('error');
+              sr.html('Success');
+              sr.slideDown('slow').delay(3000).slideUp('slow');
+            } else {
+              sr.addClass('error');
+              sr.html('Fail');
+              sr.slideDown('slow');
+            }
+            $('#loading').hide();
+          }
+        });
       });
     });
 
     $(function() {
       $('#preview').click(function() {
-        var sec = $('#preview_sec');
-        if (sec.is(':hidden')) {
-          sec.slideDown('slow');
-        }
-        $('#preview_box').html('');
+        $('#preview_sec').slideUp('slow');
         $('#loading').show();
 
         $.ajax({
           url: '/preview?' + $('#target').serialize(),
           success: function(data) {
-            $('#preview_box').html(data);
             $('#loading').hide();
+            $('#preview_box').html(data);
+            $('#preview_sec').slideDown('slow');
           }
         });
       });
@@ -147,13 +163,16 @@
            id="loading" style="display:none" />
     </div>
 
+    <div class="section">
+      <pre id="save_result" style="display:none"></pre>
+    </div>
+
     <div class="section" style="display:none" id="preview_sec">
       <h1>Preview</h1>
 
       <p>Preview of the tweets from the above criteria.</p>
 
-      <div id="preview_box">
-      </div>
+      <div id="preview_box"></div>
     </div>
 
     {% endif %}

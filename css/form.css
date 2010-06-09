@@ -32,3 +32,7 @@
 #term_help, #filter_help {
    display: none;
 }
+
+.error {
+   color: #f00;
+}

@@ -32,7 +32,7 @@ from google.appengine.ext.webapp import template
 import tweepy
 from tweepy import Cursor
 from configs import CONSUMER_KEY, CONSUMER_SECRET, CALLBACK
-from models import OAuthToken, User
+from models import OAuthToken, User, Criterion
 from utils import Cookies
 
 
@@ -198,13 +198,13 @@ class PreviewHandler(webapp.RequestHandler):
         cookies = Cookies(self, max_age = COOKIE_LIFE)
         user, screen_name = get_user_status(cookies)
         if user is None:
-            self.error(401)
+            self.response.out.write("")
             return
 
         term = self.request.get("term")
         list_id = self.request.get("list_id")
         if len(term) == 0 or len(list_id) == 0:
-            self.error(400)
+            self.response.out.write("")
             return
 
         auth = tweepy.OAuthHandler(CONSUMER_KEY, CONSUMER_SECRET)
@@ -233,6 +233,35 @@ class PreviewHandler(webapp.RequestHandler):
         self.response.out.write("".join(result))
 
 
+class SaveHandler(webapp.RequestHandler):
+    def post(self):
+        cookies = Cookies(self, max_age = COOKIE_LIFE)
+        user, screen_name = get_user_status(cookies)
+        if user is None:
+            self.response.out.write("fail")
+            return
+
+        term = self.request.get("term")
+        list_id = self.request.get("list_id")
+        if len(term) == 0 or len(list_id) == 0:
+            self.response.out.write("fail")
+            return
+
+        c = Criterion.gql("WHERE screen_name=:name",
+                          name=user.screen_name).get()
+        if c is not None:
+            c.term = term
+            c.list_id = list_id
+        else:
+            c = Criterion(
+                screen_name = user.screen_name,
+                term = term,
+                list_id = list_id)
+        c.put()
+
+        self.response.out.write("success")
+
+
 def main():
     actions = [
         ('/', MainHandler),
@@ -241,6 +270,7 @@ def main():
         ('/sign_out', SignOutHandler),
         ('/manage', ManageHandler),
         ('/preview', PreviewHandler),
+        ('/save', SaveHandler),
         ]
     application = webapp.WSGIApplication(actions, debug=True)
     util.run_wsgi_app(application)
