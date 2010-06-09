@@ -218,20 +218,25 @@ class PreviewHandler(webapp.RequestHandler):
         total_count = 100
         effective_count = 10
         result = []
-        for status in Cursor(api.list_timeline, owner=user.screen_name, slug=list_id).items():
-            if prog.search(status.text):
-                result.append("<pre>")
-                result.append(status.user.screen_name)
-                result.append(": ")
-                result.append(status.text)
-                result.append("</pre>")
-                effective_count -= 1
 
-            total_count -= 1
+        try:
+            for status in Cursor(api.list_timeline, owner=user.screen_name, slug=list_id).items():
+                if prog.search(status.text):
+                    result.append("<pre>")
+                    result.append(status.user.screen_name)
+                    result.append(": ")
+                    result.append(status.text)
+                    result.append("</pre>")
+                    effective_count -= 1
 
-            if effective_count <= 0 or total_count <= 0:
-                # enough for preview?
-                break
+                total_count -= 1
+
+                if effective_count <= 0 or total_count <= 0:
+                    # enough for preview?
+                    break
+        except tweepy.TweepError, e:
+            self.response.out.write("")
+            return
 
         self.response.out.write("".join(result))
 
