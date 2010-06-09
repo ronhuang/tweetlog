@@ -28,7 +28,9 @@ from google.appengine.ext import webapp
 from google.appengine.ext.webapp import util
 import os
 import re
+import logging
 from google.appengine.ext.webapp import template
+from google.appengine.api.labs import taskqueue
 import tweepy
 from tweepy import Cursor
 from configs import CONSUMER_KEY, CONSUMER_SECRET, CALLBACK
@@ -270,6 +272,45 @@ class SaveHandler(webapp.RequestHandler):
         self.response.out.write("success")
 
 
+class TriggerHandler(webapp.RequestHandler):
+    def get(self):
+        for c in Criterion.all():
+            u = User.gql("WHERE screen_name = :name", name = c.screen_name).get()
+            if u is None:
+                continue
+
+            params = {
+                "screen_name": u.screen_name, "since_id": u.since_id,
+                "token_key": u.token_key, "token_secret": u.token_secret,
+                "term": c.term, "list_id": c.list_id,
+                }
+            taskqueue.add(url = "/collect", params = params)
+
+
+class CollectHandler(webapp.RequestHandler):
+    def post(self):
+        screen_name = self.request.get("screen_name")
+        token_key = self.request.get("token_key")
+        token_secret = self.request.get("token_secret")
+        term = self.request.get("term")
+        list_id = self.request.get("list_id")
+        since_id = self.request.get("since_id")
+
+        auth = tweepy.OAuthHandler(CONSUMER_KEY, CONSUMER_SECRET)
+        auth.set_access_token(token_key, token_secret)
+        api = tweepy.API(auth)
+
+        prog = re.compile(term, re.IGNORECASE)
+        try:
+            for status in Cursor(api.list_timeline, owner=screen_name, slug=list_id, since_id=since_id).items():
+                if prog.search(status.text):
+                    # FIXME: implement retweet and save since_id
+                    logging.info("RT %d", status.id)
+        except tweepy.TweepError, e:
+            logging.error(e)
+            return
+
+
 def main():
     actions = [
         ('/', MainHandler),
@@ -279,6 +320,8 @@ def main():
         ('/manage', ManageHandler),
         ('/preview', PreviewHandler),
         ('/save', SaveHandler),
+        ('/trigger', TriggerHandler),
+        ('/collect', CollectHandler),
         ]
     application = webapp.WSGIApplication(actions, debug=True)
     util.run_wsgi_app(application)

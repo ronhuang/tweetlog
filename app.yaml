@@ -14,5 +14,13 @@ handlers:
   static_files: img/favicon.ico
   upload: img/favicon.ico
 
+- url: /_ah/queue/deferred
+  script: $PYTHON_LIB/google/appengine/ext/deferred/deferred.py
+  login: admin
+
+- url: /trigger
+  script: main.py
+  login: admin
+
 - url: .*
   script: main.py
