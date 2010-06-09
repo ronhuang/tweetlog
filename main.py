@@ -136,8 +136,11 @@ class SignInHandler(webapp.RequestHandler):
             token_secret = cookies["auau"]
 
         if token_key is not None and token_secret is not None:
-            self.redirect("/manage")
-            return
+            user = User.gql("WHERE token_key=:key AND token_secret=:secret",
+                            key=token_key, secret=token_secret).get()
+            if user is not None:
+                self.redirect("/manage")
+                return
 
         # OAuth dance
         auth = tweepy.OAuthHandler(CONSUMER_KEY, CONSUMER_SECRET, CALLBACK)
