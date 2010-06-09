@@ -29,6 +29,7 @@ from google.appengine.ext.webapp import util
 import os
 from google.appengine.ext.webapp import template
 import tweepy
+from tweepy import Cursor
 from configs import CONSUMER_KEY, CONSUMER_SECRET, CALLBACK
 from models import OAuthToken, User
 from utils import Cookies
@@ -172,10 +173,24 @@ class ManageHandler(webapp.RequestHandler):
     def get(self):
         cookies = Cookies(self, max_age = COOKIE_LIFE)
         user, screen_name = get_user_status(cookies)
+        lists = []
+
+        if user:
+            auth = tweepy.OAuthHandler(CONSUMER_KEY, CONSUMER_SECRET)
+            auth.set_access_token(user.token_key, user.token_secret)
+            api = tweepy.API(auth)
+
+            #me = api.me()
+            #for l in me.lists()[0]:
+            #    lists.append(l.full_name)
+
+            for l in Cursor(api.lists).items():
+                lists.append(l)
 
         data = {
             'signed_in': user and True,
             'screen_name': screen_name,
+            'lists': lists,
             }
         path = os.path.join(os.path.dirname(__file__), 'view', 'manage.html')
         self.response.out.write(template.render(path, data))

@@ -1,0 +1,34 @@
+.term, .filter {
+   margin: 0 0 1.5em 0;
+   font-size: 0.75em; /* Hack to make code look same size as body font */
+   line-height: 1.5em;
+   color: #111;
+   background: #fffff0;
+   border: 1px solid #ddc;
+   padding: 0.5em 1em;
+   overflow: hidden;
+
+	/* Experimental CSS3 stuff */
+   box-shadow: 1px 1px 6px #ccc;
+   -webkit-box-shadow: 1px 1px 6px #ccc;
+   -moz-box-shadow: 1px 1px 6px #ccc;
+}
+
+.help {
+   margin-left: 0.3em;
+   vertical-align: text-bottom;
+}
+
+.help:hover {
+   cursor: pointer;
+   cursor: hand;
+
+	/* Experimental CSS3 stuff */
+   box-shadow: 1px 1px 6px #ccc;
+   -webkit-box-shadow: 1px 1px 6px #ccc;
+   -moz-box-shadow: 1px 1px 6px #ccc;
+}
+
+#term_help, #filter_help {
+   display: none;
+}

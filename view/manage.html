@@ -7,29 +7,41 @@
   <meta http-equiv="content-type" content="text/html; charset=utf-8" />
   <title>Tweet Log</title>
   <meta name="author" content="Ron Huang" />
+  <link rel="stylesheet" href="/css/form.css" type="text/css" />
   <link rel="stylesheet" href="/css/screen.css" type="text/css" />
   <link rel="stylesheet" href="/css/button.css" type="text/css" />
-  <script type="text/javascript"
-          src="http://www.google.com/jsapi?key=ABQIAAAAp4Y2BcCyfUwcS_U7UAFmiBT61j1l2Eev-fcOj2BSQjb3ic9toxSaej_H4E1ykmZsP_aNpg-MtSpC6g">
-  </script>
-  <script type="text/javascript">
-    //<![CDATA[
-    google.load("jquery", "1.4.2");
-    //]]>
-  </script>
-
+  <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js" />
   <script>
     //<![CDATA[
     $(function() {
-      $('#toggle_help').click(function() {
-        if ($('#help').is(':hidden')) {
-          $('#help').slideDown('slow');
+      $('#toggle_term_help').click(function() {
+        if ($('#term_help').is(':hidden')) {
+          $('#term_help').slideDown('slow');
         } else {
-          $('#help').slideUp('slow', function() {
-            $('#help').hide();
+          $('#term_help').slideUp('slow', function() {
+            $('#term_help').hide();
           });
         }
         return false;
+      });
+    });
+
+    $(function() {
+      $('#toggle_filter_help').click(function() {
+        if ($('#filter_help').is(':hidden')) {
+          $('#filter_help').slideDown('slow');
+        } else {
+          $('#filter_help').slideUp('slow', function() {
+            $('#filter_help').hide();
+          });
+        }
+        return false;
+      });
+    });
+
+    $(function() {
+      $('#save').click(function() {
+        alert($('#target').serialize());
       });
     });
     //]]>
@@ -67,29 +79,48 @@
 
     {% else %}
 
-    <p>Specify the tweets you wish to collect (<a href="#" id="toggle_help">help</a>.)</p>
+    <p>Provide the search term and list of users you wish to collect
+    tweets from</p>
 
-    <div id="help" style="display:none;">
+    <form id="target">
+
     <div class="section">
       <h1 id="research">Search</h1>
 
-      <p>The term you with to search. For example:</p>
+      <input type="text" name="term" value="" class="term" />
+      <img src="/img/question.png" alt="Show help" class="help" id="toggle_term_help" />
 
-      <pre>#hash_tag</pre>
-      <pre>@screen_name</pre>
-      <pre>keyword</pre>
+      <div id="term_help">
+        <p>The term you with to search. For example:</p>
+        <pre>#hash_tag</pre>
+        <pre>@screen_name</pre>
+        <pre>keyword</pre>
+      </div>
     </div>
 
     <div class="section">
       <h1 id="research">Filter</h1>
 
-      <p>Specify the users (separated with comma) you wish to filter. For example:</p>
+      <select name="filter" class="filter">
+        <option value="">Please select...</option>
+        {% for l in lists %}
+        <option value="{{ l.id }}">{{ l.full_name }}</option>
+        {% endfor %}
+      </select>
+      <img src="/img/question.png" alt="Show help" class="help" id="toggle_filter_help" />
 
-      <pre>LordPalpatine, yoda, TheObiWanKenobi, darthvader</pre>
-    </div>
+      <div id="filter_help">
+        <p>Specify the list of users you wish to filter. Please modify
+          the list from your favorite Twitter client.</p>
+      </div>
     </div>
 
-    <p>FIXME</p>
+    <div class="section">
+      <input type="button" value="Preview" id="preview" />
+      <input type="button" value="Save" id="save" />
+    </div>
+
+    </form>
 
     {% endif %}
 
