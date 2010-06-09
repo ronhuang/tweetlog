@@ -27,6 +27,7 @@
 from google.appengine.ext import webapp
 from google.appengine.ext.webapp import util
 import os
+import re
 from google.appengine.ext.webapp import template
 import tweepy
 from tweepy import Cursor
@@ -180,10 +181,6 @@ class ManageHandler(webapp.RequestHandler):
             auth.set_access_token(user.token_key, user.token_secret)
             api = tweepy.API(auth)
 
-            #me = api.me()
-            #for l in me.lists()[0]:
-            #    lists.append(l.full_name)
-
             for l in Cursor(api.lists).items():
                 lists.append(l)
 
@@ -196,6 +193,46 @@ class ManageHandler(webapp.RequestHandler):
         self.response.out.write(template.render(path, data))
 
 
+class PreviewHandler(webapp.RequestHandler):
+    def get(self):
+        cookies = Cookies(self, max_age = COOKIE_LIFE)
+        user, screen_name = get_user_status(cookies)
+        if user is None:
+            self.error(401)
+            return
+
+        term = self.request.get("term")
+        list_id = self.request.get("list_id")
+        if len(term) == 0 or len(list_id) == 0:
+            self.error(400)
+            return
+
+        auth = tweepy.OAuthHandler(CONSUMER_KEY, CONSUMER_SECRET)
+        auth.set_access_token(user.token_key, user.token_secret)
+        api = tweepy.API(auth)
+
+        prog = re.compile(term, re.IGNORECASE)
+        total_count = 100
+        effective_count = 10
+        result = []
+        for status in Cursor(api.list_timeline, owner=user.screen_name, slug=list_id).items():
+            if prog.search(status.text):
+                result.append("<pre>")
+                result.append(status.user.screen_name)
+                result.append(": ")
+                result.append(status.text)
+                result.append("</pre>")
+                effective_count -= 1
+
+            total_count -= 1
+
+            if effective_count <= 0 or total_count <= 0:
+                # enough for preview?
+                break
+
+        self.response.out.write("".join(result))
+
+
 def main():
     actions = [
         ('/', MainHandler),
@@ -203,6 +240,7 @@ def main():
         ('/sign_in', SignInHandler),
         ('/sign_out', SignOutHandler),
         ('/manage', ManageHandler),
+        ('/preview', PreviewHandler),
         ]
     application = webapp.WSGIApplication(actions, debug=True)
     util.run_wsgi_app(application)

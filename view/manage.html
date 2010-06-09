@@ -10,7 +10,8 @@
   <link rel="stylesheet" href="/css/form.css" type="text/css" />
   <link rel="stylesheet" href="/css/screen.css" type="text/css" />
   <link rel="stylesheet" href="/css/button.css" type="text/css" />
-  <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js" />
+  <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js">
+  </script>
   <script>
     //<![CDATA[
     $(function() {
@@ -42,6 +43,25 @@
     $(function() {
       $('#save').click(function() {
         alert($('#target').serialize());
+      });
+    });
+
+    $(function() {
+      $('#preview').click(function() {
+        var sec = $('#preview_sec');
+        if (sec.is(':hidden')) {
+          sec.slideDown('slow');
+        }
+        $('#preview_box').html('');
+        $('#loading').show();
+
+        $.ajax({
+          url: '/preview?' + $('#target').serialize(),
+          success: function(data) {
+            $('#preview_box').html(data);
+            $('#loading').hide();
+          }
+        });
       });
     });
     //]]>
@@ -85,7 +105,7 @@
     <form id="target">
 
     <div class="section">
-      <h1 id="research">Search</h1>
+      <h1 id="search">Search</h1>
 
       <input type="text" name="term" value="" class="term" />
       <img src="/img/question.png" alt="Show help" class="help" id="toggle_term_help" />
@@ -99,9 +119,9 @@
     </div>
 
     <div class="section">
-      <h1 id="research">Filter</h1>
+      <h1 id="filter">Filter</h1>
 
-      <select name="filter" class="filter">
+      <select name="list_id" class="filter">
         <option value="">Please select...</option>
         {% for l in lists %}
         <option value="{{ l.id }}">{{ l.full_name }}</option>
@@ -121,6 +141,17 @@
     </div>
 
     </form>
+
+    <div class="section" style="display:none" id="preview_sec">
+      <h1>Preview</h1>
+
+      <p>Preview of the tweets from the above criteria.</p>
+      <img src="/img/ajax-loader.gif" alt="Please wait..."
+           id="loading" style="display:none" />
+
+      <div id="preview_box">
+      </div>
+    </div>
 
     {% endif %}
 
