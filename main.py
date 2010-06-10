@@ -93,7 +93,7 @@ class CallbackHandler(webapp.RequestHandler):
 
         auth = tweepy.OAuthHandler(CONSUMER_KEY, CONSUMER_SECRET)
         auth.set_request_token(request_token.token_key, request_token.token_secret)
-        request_token.delete() # FIXME: better use session.
+        request_token.delete()
 
         # fetch the access token
         try:
@@ -156,10 +156,15 @@ class SignInHandler(webapp.RequestHandler):
             return
 
         # store the request token for later use in the callback page.
-        # FIXME: better use session.
+        oauth_token = auth.request_token.key
+        oauth_secret = auth.request_token.secret
+        request_token = OAuthToken.gql("WHERE token_key=:key AND secret=:secret",
+                                       key=oauth_token, secret=oauth_secret).get()
+        if request_token is not None:
+            request_token.delete()
         request_token = OAuthToken(
-            token_key = auth.request_token.key,
-            token_secret = auth.request_token.secret
+            token_key = oauth_token,
+            token_secret = oauth_secret
             )
         request_token.put()
 

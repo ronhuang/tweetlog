@@ -30,13 +30,14 @@ from google.appengine.ext import db
 class OAuthToken(db.Model):
     token_key = db.StringProperty(required=True)
     token_secret = db.StringProperty(required=True)
+    created_at = db.DateTimeProperty(required=True, auto_now_add=True)
 
 
 class User(db.Model):
     screen_name = db.StringProperty(required=True)
     token_key = db.StringProperty(required=True)
     token_secret = db.StringProperty(required=True)
-    since_id = db.IntegerProperty(required=True, default=1)
+    since_id = db.IntegerProperty()
 
 
 class Criterion(db.Model):
