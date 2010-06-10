@@ -313,7 +313,7 @@ class CollectHandler(webapp.RequestHandler):
         if since_id is None:
             try:
                 for t in Cursor(api.retweeted_by_me).items():
-                    existing_tweets.add(t.id)
+                    existing_tweets.add(t.retweeted_status.id)
             except tweepy.TweepError, e:
                 logging.error(e)
                 return
