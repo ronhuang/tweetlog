@@ -1,4 +1,4 @@
 cron:
 - description: hourly update
   url: /trigger
-  schedule: every 60 minutes
+  schedule: every 30 minutes
