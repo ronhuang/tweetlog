@@ -334,8 +334,9 @@ class CollectHandler(webapp.RequestHandler):
             return
 
         # update since_id
-        u.since_id = max_id
-        u.put()
+        if u.since_id < max_id:
+            u.since_id = max_id
+            u.put()
 
 
 def main():
