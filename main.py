@@ -268,10 +268,22 @@ class SaveHandler(webapp.RequestHandler):
 
         term = self.request.get("term")
         list_id = self.request.get("list_id")
+
+        # delete the criterion if both are empty.
+        if len(term) == 0 and len(list_id) == 0:
+            c = Criterion.gql("WHERE screen_name=:name",
+                              name=screen_name).get()
+            if c is not None:
+                c.delete()
+            self.response.out.write("success")
+            return
+
+        # return fail if some fields are empty.
         if len(term) == 0 or len(list_id) == 0:
             self.response.out.write("fail")
             return
 
+        # create or update criterion
         c = Criterion.gql("WHERE screen_name=:name",
                           name=user.screen_name).get()
         if c is not None:
