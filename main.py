@@ -322,10 +322,11 @@ class CollectHandler(webapp.RequestHandler):
         prog = re.compile(term, re.IGNORECASE)
         max_id = 1
         try:
-            for t in Cursor(api.list_timeline, owner=screen_name, slug=list_id, since_id=since_id).items():
+            for t in Cursor(api.list_timeline, owner=screen_name, slug=list_id, since_id=since_id or 1).items():
                 if prog.search(t.text) and (t.id not in existing_tweets):
                     # FIXME: implement retweet
-                    logging.info("RT %d", t.id)
+                    logging.info("%s RT %d", screen_name, t.id)
+                    api.retweet(t.id)
                 # keep max tweet id as the next since_id
                 if max_id < t.id:
                     max_id = t.id
