@@ -200,7 +200,7 @@ class ManageHandler(webapp.RequestHandler):
         c = Criterion.gql("WHERE screen_name=:name", name=screen_name).get()
         if c:
             term = c.term
-            list_id = int(c.list_id or 0)
+            list_id = c.list_id or 0
 
         data = {
             'signed_in': user and True,
@@ -222,8 +222,15 @@ class PreviewHandler(webapp.RequestHandler):
             return
 
         term = self.request.get("term")
-        list_id = self.request.get("list_id")
+        list_id = self.request.get("list_id") # string
         if len(term) == 0 or len(list_id) == 0:
+            self.response.out.write("")
+            return
+
+        # convert list_id from string to long
+        try:
+            list_id = long(list_id) # long
+        except:
             self.response.out.write("")
             return
 
@@ -283,6 +290,13 @@ class SaveHandler(webapp.RequestHandler):
             self.response.out.write("fail")
             return
 
+        # convert list_id from string to long
+        try:
+            list_id = long(list_id) # long
+        except:
+            self.response.out.write("fail")
+            return
+
         # create or update criterion
         c = Criterion.gql("WHERE screen_name=:name",
                           name=user.screen_name).get()
@@ -315,6 +329,13 @@ class CollectHandler(webapp.RequestHandler):
         screen_name = self.request.get("screen_name")
         term = self.request.get("term")
         list_id = self.request.get("list_id")
+
+        # convert list_id from string to long
+        try:
+            list_id = long(list_id) # long
+        except:
+            logging.error("Could not convert data to an integer.")
+            return
 
         u = User.gql("WHERE screen_name = :name", name = screen_name).get()
         if u is None:
