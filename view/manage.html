@@ -42,7 +42,7 @@
 
     $(function() {
       $('#save').click(function() {
-        $('#save_result').hide();
+        $('#result').hide();
         $('#loading').show();
 
         $.ajax({
@@ -50,13 +50,13 @@
           url: '/save',
           data: $('#target').serialize(),
           success: function(data) {
-            sr = $('#save_result');
+            sr = $('#result');
             sr.removeClass('error');
             sr.html('Success.');
             sr.slideDown('slow').delay(3000).slideUp('slow');
           },
           error: function() {
-            sr = $('#save_result');
+            sr = $('#result');
             sr.addClass('error');
             sr.html('Fail.');
             sr.slideDown('slow');
@@ -70,7 +70,7 @@
 
     $(function() {
       $('#preview').click(function() {
-        $('#save_result').hide();
+        $('#result').hide();
         $('#preview_sec').hide();
         $('#loading').show();
 
@@ -81,14 +81,14 @@
               $('#preview_box').html(data);
               $('#preview_sec').slideDown('slow');
             } else {
-              sr = $('#save_result');
+              sr = $('#result');
               sr.removeClass('error');
               sr.html('Empty.');
               sr.slideDown('slow');
             }
           },
           error: function() {
-            sr = $('#save_result');
+            sr = $('#result');
             sr.addClass('error');
             sr.html('Fail.');
             sr.slideDown('slow');
@@ -187,7 +187,7 @@
     </div>
 
     <div class="section">
-      <pre id="save_result" style="display:none"></pre>
+      <pre id="result" style="display:none"></pre>
     </div>
 
     <div class="section" style="display:none" id="preview_sec">
