@@ -194,8 +194,11 @@ class ManageHandler(webapp.RequestHandler):
             auth.set_access_token(user.token_key, user.token_secret)
             api = tweepy.API(auth)
 
-            for l in Cursor(api.lists).items():
-                lists.append(l)
+            try:
+                for l in Cursor(api.lists).items():
+                    lists.append(l)
+            except tweepy.TweepError, e:
+                logging.error(e)
 
         c = Criterion.gql("WHERE screen_name=:name", name=screen_name).get()
         if c:
