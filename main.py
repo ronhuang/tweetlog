@@ -182,9 +182,12 @@ class SignOutHandler(webapp.RequestHandler):
 
 class ManageHandler(webapp.RequestHandler):
     def get(self):
+        lists = []
+        term = ""
+        list_id = 0
+
         cookies = Cookies(self, max_age = COOKIE_LIFE)
         user, screen_name = get_user_status(cookies)
-        lists = []
 
         if user:
             auth = tweepy.OAuthHandler(CONSUMER_KEY, CONSUMER_SECRET)
@@ -194,10 +197,17 @@ class ManageHandler(webapp.RequestHandler):
             for l in Cursor(api.lists).items():
                 lists.append(l)
 
+        c = Criterion.gql("WHERE screen_name=:name", name=screen_name).get()
+        if c:
+            term = c.term
+            list_id = int(c.list_id or 0)
+
         data = {
             'signed_in': user and True,
             'screen_name': screen_name,
             'lists': lists,
+            'term': term,
+            'list_id': list_id,
             }
         path = os.path.join(os.path.dirname(__file__), 'view', 'manage.html')
         self.response.out.write(template.render(path, data))
@@ -324,7 +334,6 @@ class CollectHandler(webapp.RequestHandler):
         try:
             for t in Cursor(api.list_timeline, owner=screen_name, slug=list_id, since_id=since_id or 1).items():
                 if prog.search(t.text) and (t.id not in existing_tweets):
-                    # FIXME: implement retweet
                     logging.info("%s RT %d", screen_name, t.id)
                     api.retweet(t.id)
                 # keep max tweet id as the next since_id

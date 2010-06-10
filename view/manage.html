@@ -123,7 +123,7 @@
     <div class="section">
       <h1 id="search">Search</h1>
 
-      <input type="text" name="term" value="" class="term" />
+      <input type="text" name="term" value="{{ term }}" class="term" />
       <img src="/img/question.png" alt="Show help" class="help" id="toggle_term_help" />
 
       <div id="term_help">
@@ -140,7 +140,11 @@
       <select name="list_id" class="filter">
         <option value="">Please select...</option>
         {% for l in lists %}
+        {% ifequal l.id list_id %}
+        <option value="{{ l.id }}" selected="selected">{{ l.full_name }}</option>
+        {% else %}
         <option value="{{ l.id }}">{{ l.full_name }}</option>
+        {% endifequal %}
         {% endfor %}
       </select>
       <img src="/img/question.png" alt="Show help" class="help" id="toggle_filter_help" />
