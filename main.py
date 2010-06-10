@@ -280,14 +280,10 @@ class SaveHandler(webapp.RequestHandler):
 class TriggerHandler(webapp.RequestHandler):
     def get(self):
         for c in Criterion.all():
-            u = User.gql("WHERE screen_name = :name", name = c.screen_name).get()
-            if u is None:
-                continue
-
             params = {
-                "screen_name": u.screen_name, "since_id": u.since_id,
-                "token_key": u.token_key, "token_secret": u.token_secret,
-                "term": c.term, "list_id": c.list_id,
+                "screen_name": c.screen_name,
+                "term": c.term,
+                "list_id": c.list_id,
                 }
             taskqueue.add(url = "/collect", params = params)
 
@@ -295,25 +291,51 @@ class TriggerHandler(webapp.RequestHandler):
 class CollectHandler(webapp.RequestHandler):
     def post(self):
         screen_name = self.request.get("screen_name")
-        token_key = self.request.get("token_key")
-        token_secret = self.request.get("token_secret")
         term = self.request.get("term")
         list_id = self.request.get("list_id")
-        since_id = self.request.get("since_id")
 
+        u = User.gql("WHERE screen_name = :name", name = screen_name).get()
+        if u is None:
+            logging.error("Could not find screen name: %s.", screen_name)
+            return
+        since_id = u.since_id
+        token_key = u.token_key
+        token_secret = u.token_secret
+
+        # prepare Twitter API.
         auth = tweepy.OAuthHandler(CONSUMER_KEY, CONSUMER_SECRET)
         auth.set_access_token(token_key, token_secret)
         api = tweepy.API(auth)
 
+        # if it's the first time this user is using this service,
+        # check all the existing tweets.
+        existing_tweets = set()
+        if since_id is None:
+            try:
+                for t in Cursor(api.retweeted_by_me).items():
+                    existing_tweets.add(t.id)
+            except tweepy.TweepError, e:
+                logging.error(e)
+                return
+
+        # retweet
         prog = re.compile(term, re.IGNORECASE)
+        max_id = 1
         try:
-            for status in Cursor(api.list_timeline, owner=screen_name, slug=list_id, since_id=since_id).items():
-                if prog.search(status.text):
-                    # FIXME: implement retweet and save since_id
-                    logging.info("RT %d", status.id)
+            for t in Cursor(api.list_timeline, owner=screen_name, slug=list_id, since_id=since_id).items():
+                if prog.search(t.text) and (t.id not in existing_tweets):
+                    # FIXME: implement retweet
+                    logging.info("RT %d", t.id)
+                # keep max tweet id as the next since_id
+                if max_id < t.id:
+                    max_id = t.id
         except tweepy.TweepError, e:
             logging.error(e)
             return
+
+        # update since_id
+        u.since_id = max_id
+        u.put()
 
 
 def main():
