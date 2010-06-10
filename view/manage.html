@@ -42,6 +42,7 @@
 
     $(function() {
       $('#save').click(function() {
+        $('#save_result').hide();
         $('#loading').show();
 
         $.ajax({
@@ -50,15 +51,17 @@
           data: $('#target').serialize(),
           success: function(data) {
             sr = $('#save_result');
-            if ('success' == data) {
-              sr.removeClass('error');
-              sr.html('Success');
-              sr.slideDown('slow').delay(3000).slideUp('slow');
-            } else {
-              sr.addClass('error');
-              sr.html('Fail');
-              sr.slideDown('slow');
-            }
+            sr.removeClass('error');
+            sr.html('Success.');
+            sr.slideDown('slow').delay(3000).slideUp('slow');
+          },
+          error: function() {
+            sr = $('#save_result');
+            sr.addClass('error');
+            sr.html('Fail.');
+            sr.slideDown('slow');
+          },
+          complete: function() {
             $('#loading').hide();
           }
         });
@@ -67,15 +70,31 @@
 
     $(function() {
       $('#preview').click(function() {
-        $('#preview_sec').slideUp('slow');
+        $('#save_result').hide();
+        $('#preview_sec').hide();
         $('#loading').show();
 
         $.ajax({
           url: '/preview?' + $('#target').serialize(),
           success: function(data) {
+            if (data.length > 0) {
+              $('#preview_box').html(data);
+              $('#preview_sec').slideDown('slow');
+            } else {
+              sr = $('#save_result');
+              sr.removeClass('error');
+              sr.html('Empty.');
+              sr.slideDown('slow');
+            }
+          },
+          error: function() {
+            sr = $('#save_result');
+            sr.addClass('error');
+            sr.html('Fail.');
+            sr.slideDown('slow');
+          },
+          complete: function() {
             $('#loading').hide();
-            $('#preview_box').html(data);
-            $('#preview_sec').slideDown('slow');
           }
         });
       });

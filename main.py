@@ -221,20 +221,20 @@ class PreviewHandler(webapp.RequestHandler):
         cookies = Cookies(self, max_age = COOKIE_LIFE)
         user, screen_name = get_user_status(cookies)
         if user is None:
-            self.response.out.write("")
+            self.error(401)
             return
 
         term = self.request.get("term")
         list_id = self.request.get("list_id") # string
         if len(term) == 0 or len(list_id) == 0:
-            self.response.out.write("")
+            self.error(400)
             return
 
         # convert list_id from string to long
         try:
             list_id = long(list_id) # long
         except:
-            self.response.out.write("")
+            self.error(400)
             return
 
         auth = tweepy.OAuthHandler(CONSUMER_KEY, CONSUMER_SECRET)
@@ -262,7 +262,7 @@ class PreviewHandler(webapp.RequestHandler):
                     # enough for preview?
                     break
         except tweepy.TweepError, e:
-            self.response.out.write("")
+            self.error(503)
             return
 
         self.response.out.write("".join(result))
@@ -273,7 +273,7 @@ class SaveHandler(webapp.RequestHandler):
         cookies = Cookies(self, max_age = COOKIE_LIFE)
         user, screen_name = get_user_status(cookies)
         if user is None:
-            self.response.out.write("fail")
+            self.error(401)
             return
 
         term = self.request.get("term")
@@ -285,19 +285,18 @@ class SaveHandler(webapp.RequestHandler):
                               name=screen_name).get()
             if c is not None:
                 c.delete()
-            self.response.out.write("success")
             return
 
         # return fail if some fields are empty.
         if len(term) == 0 or len(list_id) == 0:
-            self.response.out.write("fail")
+            self.error(400)
             return
 
         # convert list_id from string to long
         try:
             list_id = long(list_id) # long
         except:
-            self.response.out.write("fail")
+            self.error(400)
             return
 
         # create or update criterion
@@ -312,8 +311,6 @@ class SaveHandler(webapp.RequestHandler):
                 term = term,
                 list_id = list_id)
         c.put()
-
-        self.response.out.write("success")
 
 
 class TriggerHandler(webapp.RequestHandler):
