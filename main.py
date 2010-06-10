@@ -352,29 +352,33 @@ class CollectHandler(webapp.RequestHandler):
 
         # if it's the first time this user is using this service,
         # check all the existing tweets.
-        existing_tweets = set()
+        existing_retweets = set()
         if since_id is None:
             try:
                 for t in Cursor(api.retweeted_by_me).items():
-                    existing_tweets.add(t.retweeted_status.id)
+                    existing_retweets.add(t.retweeted_status.id)
             except tweepy.TweepError, e:
                 logging.error(e)
                 return
 
-        # retweet
+        # collect tweets to retweet
         prog = re.compile(term, re.IGNORECASE)
         max_id = 1
+        tweet_ids = []
         try:
             for t in Cursor(api.list_timeline, owner=screen_name, slug=list_id, since_id=since_id or 1).items():
-                if prog.search(t.text) and (t.id not in existing_tweets):
-                    logging.info("%s RT %d", screen_name, t.id)
-                    api.retweet(t.id)
+                if prog.search(t.text) and (t.id not in existing_retweets):
+                    tweet_ids.insert(0, t.id) # old tweets are retweeted first
                 # keep max tweet id as the next since_id
                 if max_id < t.id:
                     max_id = t.id
         except tweepy.TweepError, e:
             logging.error(e)
             return
+
+        # retweet
+        for i in tweet_ids:
+            api.retweet(i)
 
         # update since_id
         if u.since_id < max_id:
