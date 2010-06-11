@@ -378,7 +378,10 @@ class CollectHandler(webapp.RequestHandler):
 
         # retweet
         for i in tweet_ids:
-            api.retweet(i)
+            try:
+                api.retweet(i)
+            except tweepy.TweepError, e:
+                pass
 
         # update since_id
         if u.since_id < max_id:
